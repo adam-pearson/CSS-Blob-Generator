@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <script src="https://unpkg.com/vue@3"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="h-full">
+        <div id="app" class="h-full">
+            <div class="grid h-full grid-cols-4">
+                <section
+                    class="preview col-span-3 bg-slate-600 grid place-items-center overflow-auto p-12"
+                >
+                    <div :style="previewStyles"></div>
+                </section>
+
+                <section class="settings bg-slate-300 p-4">
+                    <form id="optionsForm" class="flex flex-col">
+                        <label class="grid grid-cols-6 mb-2">
+                            <span class="col-span-2">Width</span>
+                            <input
+                                v-model="options.width.value"
+                                type="number"
+                                class="col-span-3"
+                            />
+                            <select
+                                v-model="options.width.units"
+                                class="col-span-1"
+                            >
+                                <option
+                                    v-for="opt in unitsOptions"
+                                    :key="opt.id"
+                                    :value="opt.unit"
+                                >
+                                    {{ opt.unit }}
+                                </option>
+                            </select>
+                        </label>
+                        <label class="grid grid-cols-6 mb-2">
+                            <span class="col-span-2">Height</span>
+                            <input
+                                v-model="options.height.value"
+                                type="number"
+                                class="col-span-3"
+                            />
+                            <select
+                                v-model="options.height.units"
+                                class="col-span-1"
+                            >
+                                <option
+                                    v-for="opt in unitsOptions"
+                                    :key="opt.id"
+                                    :value="opt.unit"
+                                >
+                                    {{ opt.unit }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <fieldset class="flex flex-col mb-2">
+                            <h3>Border Radii</h3>
+                            <label
+                                v-for="rad in options.rads"
+                                :key="rad.id"
+                                class="grid grid-cols-12 mb-2"
+                            >
+                                <span class="col-span-1">
+                                    {{ rad.description }}
+                                </span>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1000"
+                                    step="1"
+                                    v-model="rad.val"
+                                    class="col-span-5 ml-1 mar-1"
+                                />
+                                <input
+                                    v-model="rad.val"
+                                    type="number"
+                                    class="col-span-3 ml-1 mr-1"
+                                />
+                                <select v-model="rad.units" class="col-span-3">
+                                    <option
+                                        v-for="opt in unitsOptions"
+                                        :key="opt.id"
+                                        :value="opt.unit"
+                                    >
+                                        {{ opt.unit }}
+                                    </option>
+                                </select>
+                            </label>
+                        </fieldset>
+
+                        <label class="grid grid-cols-6 mb-2">
+                            <span class="col-span-4"
+                                >Enable elliptical Border Radii</span
+                            >
+                            <input
+                                v-model="options.ellipticalRadsEnabled"
+                                type="checkbox"
+                                class="col-span-2"
+                            />
+                        </label>
+
+                        <fieldset
+                            v-if="options.ellipticalRadsEnabled"
+                            class="flex flex-col mb-2"
+                        >
+                            <h3>elliptical Border Radii</h3>
+                            <label
+                                v-for="eRad in options.ellipticalRads"
+                                :key="eRad.id"
+                                class="grid grid-cols-12 mb-2"
+                            >
+                                <span class="col-span-1">
+                                    {{ eRad.description }}
+                                </span>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1000"
+                                    step="1"
+                                    v-model="eRad.val"
+                                    class="col-span-5 ml-1 mar-1"
+                                />
+                                <input
+                                    v-model="eRad.val"
+                                    type="number"
+                                    class="col-span-3 ml-1 mr-1"
+                                />
+                                <select v-model="eRad.units" class="col-span-3">
+                                    <option
+                                        v-for="opt in unitsOptions"
+                                        :key="opt.id"
+                                        :value="opt.unit"
+                                    >
+                                        {{ opt.unit }}
+                                    </option>
+                                </select>
+                            </label>
+                        </fieldset>
+
+                        <button
+                            @click.prevent="randomiseBorderValues"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Randomise Border Radius
+                        </button>
+                        <button
+                            @click.prevent="copyCSS"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Copy CSS
+                        </button>
+                    </form>
+                </section>
+            </div>
+        </div>
+
+        <script>
+            let app = {
+                data() {
+                    return {
+                        unitsOptions: [
+                            { id: 0, unit: "px" },
+                            { id: 1, unit: "%" },
+                            { id: 2, unit: "em" },
+                            { id: 3, unit: "vh" },
+                            { id: 3, unit: "vw" },
+                        ],
+
+                        options: {
+                            rads: [
+                                {
+                                    id: 0,
+                                    val: 0,
+                                    units: "px",
+                                    description: "TL",
+                                },
+                                {
+                                    id: 1,
+                                    val: 0,
+                                    units: "px",
+                                    description: "TR",
+                                },
+                                {
+                                    id: 2,
+                                    val: 0,
+                                    units: "px",
+                                    description: "BR",
+                                },
+                                {
+                                    id: 3,
+                                    val: 0,
+                                    units: "px",
+                                    description: "BL",
+                                },
+                            ],
+                            ellipticalRadsEnabled: false,
+                            ellipticalRads: [
+                                {
+                                    id: 0,
+                                    val: 0,
+                                    units: "px",
+                                    description: "TL",
+                                },
+                                {
+                                    id: 1,
+                                    val: 0,
+                                    units: "px",
+                                    description: "TR",
+                                },
+                                {
+                                    id: 2,
+                                    val: 0,
+                                    units: "px",
+                                    description: "BR",
+                                },
+                                {
+                                    id: 3,
+                                    val: 0,
+                                    units: "px",
+                                    description: "BL",
+                                },
+                            ],
+                            width: { value: 300, units: "px" },
+                            height: { value: 300, units: "px" },
+                            background: "lightcoral",
+                        },
+                    };
+                },
+
+                mounted() {
+                    this.randomiseBorderValues(0, 300);
+                },
+
+                methods: {
+                    async copyCSS() {
+                        await navigator.clipboard.writeText(this.cssString);
+                    },
+
+                    getRandomValueInRange(min, max) {
+                        const val =
+                            Math.floor(Math.random() * (max - min + 1)) + min;
+                        return val;
+                    },
+
+                    randomiseBorderValues() {
+                        for (let rad of this.options.rads) {
+                            rad.val = this.getRandomValueInRange(0, 200);
+                        }
+
+                        for (let eRad of this.options.ellipticalRads) {
+                            eRad.val = this.getRandomValueInRange(0, 200);
+                        }
+                    },
+                },
+
+                computed: {
+                    cssString() {
+                        const styles = this.previewStyles;
+
+                        let string = "";
+
+                        string += `width: ${styles.width}; height: ${styles.height};`;
+
+                        string += ` border-radius: ${styles.borderRadius};`;
+
+                        return string;
+                    },
+
+                    previewStyles() {
+                        const borderRadString = this.options.rads
+                            .map((a) => (string = a.val + a.units))
+                            .join(" ");
+
+                        const ellipticalRadString = this.options.ellipticalRads
+                            .map((a) => (string = a.val + a.units))
+                            .join(" ");
+
+                        const styleObj = {
+                            background: this.options.background,
+                            width:
+                                this.options.width.value +
+                                this.options.width.units,
+                            height:
+                                this.options.height.value +
+                                this.options.height.units,
+                            borderRadius: this.options.ellipticalRadsEnabled
+                                ? borderRadString + " / " + ellipticalRadString
+                                : borderRadString,
+                        };
+
+                        return styleObj;
+                    },
+                },
+            };
+
+            Vue.createApp(app).mount("#app");
+        </script>
+    </body>
+</html>
